@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kết nối HTML với Python Flask Server</title>
+<style>
+:root{--bg:#dfe5ee;--bar:#fff;--bt:#1f2937;--fe:#e8590c;--be:#1c7ed6;--rq:#7048e8;--rs:#0ca678;--da:#d6336c;--ink:#1f2937;--mut:#64748b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--bar:#1e293b;--bt:#e5e7eb}}
+:root[data-theme="dark"]{--bg:#0f172a;--bar:#1e293b;--bt:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;height:100%;display:flex;flex-direction:column;background:var(--bg);font-family:"Be Vietnam Pro","Segoe UI",Roboto,Arial,sans-serif}
+#view{flex:1;position:relative;overflow:hidden}
+#deck{position:absolute;left:50%;top:50%;width:1188px;height:840px;transform-origin:center;border-radius:10px;box-shadow:0 10px 40px #0004}
+.slide{display:none;position:absolute;inset:0;flex-direction:column;background:#fff;color:var(--ink);padding:32px 48px 56px;overflow:hidden;font-size:20px;line-height:1.4;border-radius:10px}
+.slide.active{display:flex}
+h1{font-size:54px;line-height:1.12;margin:10px 0}
+h2{margin:0 0 4px;font-size:34px;display:flex;align-items:center;gap:14px}
+h2 b{background:var(--be);color:#fff;border-radius:10px;font-size:19px;padding:2px 12px}
+.sub{color:var(--mut);margin:0 0 12px;font-size:19px}
+.row{display:flex;gap:20px}.col{display:flex;flex-direction:column;gap:12px}.g1{flex:1}.mt{margin-top:14px}
+.card{border:2px solid;border-radius:16px;padding:12px 18px}
+.c-fe{border-color:var(--fe);background:#fff4ec}.c-be{border-color:var(--be);background:#edf5fd}.c-rq{border-color:var(--rq);background:#f3efff}.c-rs{border-color:var(--rs);background:#e8f9f3}.c-da{border-color:var(--da);background:#fff0f6}.c-n{border-color:#cbd5e1;background:#f8fafc}
+.tg{display:inline-block;border-radius:8px;padding:0 8px;font-weight:700;color:#fff}.t-fe{background:var(--fe)}.t-be{background:var(--be)}.t-rq{background:var(--rq)}.t-rs{background:var(--rs)}.t-da{background:var(--da)}
+.sm{font-size:16px;color:var(--mut)}
+.flow{display:flex;align-items:center}
+.node{width:220px;border:3px solid;border-radius:18px;padding:10px;text-align:center;background:#fff;flex:none}
+.node big{display:block;font-size:40px;line-height:1.1}.node b{display:block}.node small{color:var(--mut);font-size:15px;display:block}
+.node.fe{border-color:var(--fe);background:#fff4ec}.node.be{border-color:var(--be);background:#edf5fd}.node.js{border-color:var(--rq);background:#f3efff}
+.lane{position:relative;flex:1;height:100px;margin:0 6px}
+.lane::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:3px dashed #cbd5e1}
+.pk{position:absolute;width:160px;text-align:center;padding:5px 0;border-radius:14px;color:#fff;font:700 14px/1.2 inherit;opacity:0;white-space:nowrap}
+.pk.f{top:8px}.pk.b{top:60px}.rq{background:var(--rq)}.rs{background:var(--rs)}.da{background:var(--da)}
+.go .pk{animation-duration:var(--du,1.8s);animation-delay:var(--d,0s);animation-fill-mode:forwards;animation-timing-function:ease-in-out}
+.go .pk.f{animation-name:fw}.go .pk.b{animation-name:bw}
+.loop .pk{animation-iteration-count:infinite}
+@keyframes fw{0%{left:0;opacity:0}12%,88%{opacity:1}100%{left:calc(100% - 160px);opacity:0}}
+@keyframes bw{0%{left:calc(100% - 160px);opacity:0}12%,88%{opacity:1}100%{left:0;opacity:0}}
+.go .cap{animation:show .5s var(--d,0s) both}
+@keyframes show{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes gone{to{opacity:0}}
+.mem{margin-top:6px;background:#fff;border:2px dashed var(--be);border-radius:10px;padding:2px 6px;font:700 15px Consolas,monospace}
+.vv{position:relative;display:inline-block;min-width:70px;height:1.3em;vertical-align:bottom;color:var(--da)}
+.vv b{position:absolute;left:0}.vv .v0{display:none;color:#94a3b8}
+.go .v0{display:inline;animation:gone .01s var(--d,0s) forwards}.go .v1{animation:show .5s var(--d,0s) both}
+pre{margin:0;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:10px 0;font:14.5px/1.5 Consolas,"SF Mono",Menlo,monospace;overflow:hidden}
+pre>span{display:block;padding:0 14px;border-left:4px solid transparent;white-space:pre}
+pre>span.on{background:#334155;border-left-color:#fbbf24}
+pre i{font-style:normal;color:#94a3b8}
+code{font:700 .9em Consolas,monospace;background:#eef2f7;padding:0 5px;border-radius:5px}
+.ex{list-style:none;padding:0;margin:0;font-size:18px}
+.ex li{padding:6px 12px;border-radius:10px;border-left:5px solid transparent;margin-bottom:4px}
+.ex li.on{background:#fff7d6;border-left-color:#fbbf24}
+.ui{display:flex;gap:6px;align-items:center;justify-content:center;font-size:14px;margin-bottom:4px}
+.ui span{border:1px solid #94a3b8;border-radius:6px;padding:1px 8px;background:#fff}.ui .bt{background:var(--fe);color:#fff;border-color:var(--fe)}
+.ft{position:absolute;left:48px;right:48px;bottom:14px;display:flex;justify-content:space-between;font-size:13px;color:var(--mut);align-items:center}
+.lg i{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 4px 0 12px;vertical-align:-1px}
+.bar{background:var(--bar);color:var(--bt);display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:15px;position:relative;z-index:5;transition:opacity .3s}
+.bar button{font:inherit;border:0;border-radius:8px;padding:6px 14px;background:var(--be);color:#fff;cursor:pointer}.bar button:hover{filter:brightness(1.1)}
+.bar .sec{background:#64748b}
+#prog{position:absolute;left:0;top:0;height:4px;background:var(--fe);width:0;transition:width .3s}
+.fs .bar{opacity:0}.fs .bar:hover{opacity:1}
+.slide{background:#fff linear-gradient(90deg,var(--fe),var(--rq),var(--be),var(--rs)) top/100% 8px no-repeat;padding:42px 56px 58px;font-size:19px}
+h2{font-size:34px;letter-spacing:-.01em;margin-bottom:2px}
+h2 b{background:none;color:var(--fe);font-size:34px;padding:0 16px 0 0;border-right:3px solid #e2e8f0}
+.sub{font-size:18px;margin-bottom:18px}
+.card{border-width:0 0 0 6px;border-radius:12px;box-shadow:0 1px 3px #0f172a14,0 6px 18px #0f172a0d}
+.node{border-width:2px;box-shadow:0 6px 18px #0f172a16}
+.pk{box-shadow:0 2px 8px #0003}
+pre{box-shadow:0 8px 24px #0f172a33}
+.ex li{padding:9px 12px}
+.tb{width:100%;border-collapse:collapse;font-size:18px;box-shadow:0 1px 3px #0f172a14;border-radius:12px;overflow:hidden}
+.tb th{background:#0f172a;color:#fff;text-align:left;padding:9px 14px}
+.tb td{padding:9px 14px;border-bottom:1px solid #e2e8f0}
+.tb td:first-child{font-weight:700;background:#f8fafc;width:24%}
+.up{text-align:center}.up b{display:block;font:700 28px Consolas,monospace;padding:6px 12px;border-radius:10px;color:#fff}.up small{display:block;font-size:14px;color:var(--mut);margin-top:6px;max-width:190px}
+.st{flex:1;border-radius:12px;padding:8px 12px;color:#fff;font-size:16px;line-height:1.3}.st b{display:block;font-size:24px}
+:root{--nv:#0f172a;--hl:#fbbf24}
+.slide{background:#fff linear-gradient(var(--nv),var(--nv)) top/100% 8px no-repeat}
+h2 b{background:var(--nv);color:#fff;border:0;border-radius:10px;padding:2px 12px;font-size:20px}
+#prog{background:var(--hl)}
+.bar button{background:var(--bt);color:var(--bar)}
+.bar .sec{background:transparent;color:var(--bt);border:1px solid #94a3b8}
+.c-n{border-color:#94a3b8;background:#f8fafc}
+.tb th{background:var(--nv)!important}
+.up b{background:var(--nv)!important}
+.st{background:#475569!important}.st:first-child{background:var(--rs)!important}
+pre.ln{counter-reset:l}pre.ln>span{counter-increment:l}
+pre.ln>span::before{content:counter(l);display:inline-block;width:2ch;margin-right:14px;color:#64748b;text-align:right}
+.bd{display:flex;flex-direction:column;transform-origin:0 0}
+.row>pre{align-self:flex-start}
+.ex.s{font-size:14px}.ex.s li{padding:5px 10px;margin-bottom:3px}
+:root{--fe:#d9722b;--be:#3b82c4;--rq:#7c5cd6;--rs:#2e9e7c;--da:#c9487a}
+.c-fe,.node.fe{background:#fdf2e9}.c-be,.node.be{background:#ecf3fb}.c-rq,.node.js{background:#f3effc}.c-rs{background:#e8f6f0}.c-da{background:#fcedf3}.c-n{background:#f4f6f9;border-color:#94a3b8}
+.card{color:var(--ink)}
+@page{size:A4 landscape;margin:0}
+@media print{html,body{height:auto;background:#fff}.bar{display:none}#view{position:static;overflow:visible}#deck{position:static;transform:none!important;width:auto;height:auto;box-shadow:none}.slide{display:flex!important;position:relative;zoom:.944;break-after:page;border-radius:0}.pk{opacity:1;position:relative;display:none}}
+</style></head><body>
+<div id="view"><div id="deck">
+
+<section class="slide">
+<div class="sub">Bài học 90 phút · Dành cho học sinh mới bắt đầu</div>
+<h1>Kết nối HTML với<br>Python Flask Server</h1>
+<p class="sub" style="font-size:24px">Trao đổi dữ liệu giữa Frontend và Backend</p>
+<div class="card c-n"><b>Mục tiêu:</b> Hiểu cách trang HTML <span class="tg t-rq">gửi dữ liệu</span> đến Python và <span class="tg t-rs">nhận dữ liệu</span> trả về.</div>
+<div class="flow loop mt" style="margin-top:40px">
+<div class="node fe"><big>🌐</big><b>Website</b><small>Frontend (HTML)</small></div>
+<div class="lane" style="--du:2.4s"><span class="pk f rq">Request →</span><span class="pk b rs" style="--d:1.2s">← Response</span></div>
+<div class="node be"><big>🖥️</big><b>Flask Server</b><small>Backend (Python)</small></div>
+</div>
+<p class="sm" style="text-align:center">Website và máy chủ nói chuyện với nhau như hai người trao đổi tin nhắn.</p>
+</section>
+
+<section class="slide">
+<h2><b>2</b>Frontend và Backend là gì?</h2><p class="sub">Một website gồm hai phần: phần em nhìn thấy và phần chạy phía sau.</p>
+<div class="row">
+<div class="card c-fe g1"><span class="tg t-fe">Frontend</span> <b>– Mặt tiền</b><p>Phần người dùng <b>nhìn thấy và tương tác</b>: nút bấm, ô nhập, màu sắc.</p><p class="sm">Công nghệ: HTML, CSS, JavaScript</p></div>
+<div class="card c-be g1"><span class="tg t-be">Backend</span> <b>– Hậu trường</b><p>Phần <b>xử lý dữ liệu</b> trên máy chủ: nhận, tính toán, lưu trữ.</p><p class="sm">Công nghệ: Python + Flask</p></div>
+</div>
+<div class="flow mt" style="margin-top:26px">
+<div class="node fe" style="width:300px"><div class="ui"><span>Tên: Lan</span><span class="bt">Send</span></div><b>Biểu mẫu nhập tên</b><small>Em nhìn thấy và bấm</small></div>
+<div class="lane"><span style="position:absolute;top:30px;left:0;right:0;text-align:center;font-size:34px">⇄</span></div>
+<div class="node be" style="width:300px"><big>🗄️</big><b>Server nhận tên “Lan”</b><small>Em không nhìn thấy</small></div>
+</div>
+<div class="card c-n mt" style="margin-top:26px">🍜 <b>Ví dụ nhà hàng:</b> Frontend là <b>bàn ăn và thực đơn</b> khách nhìn thấy. Backend là <b>nhà bếp</b> nhận món và nấu.</div>
+</section>
+
+<section class="slide">
+<h2><b>3</b>Server hoạt động như thế nào?</h2><p class="sub"><span class="tg t-be">Server</span> (máy chủ) là máy tính luôn bật, chờ người khác nhờ việc rồi trả kết quả.</p>
+<div class="flow" style="margin-top:20px">
+<div class="node fe"><big>🌐</big><b>Trình duyệt</b><small>Chrome, Edge…</small></div>
+<div class="lane" style="--du:2s"><span class="pk f rq">Request</span><span class="pk b rs" style="--d:3s">Response</span></div>
+<div class="node be"><big>🖥️</big><b>Server</b><small>Chạy Flask</small></div>
+</div>
+<div class="row mt" style="margin-top:26px">
+<div class="card c-rq g1 cap" style="--d:.2s">① <span class="tg t-rq">Request</span> (yêu cầu): trình duyệt nhờ server làm một việc.</div>
+<div class="card c-be g1 cap" style="--d:2.2s">② Server nhận và <b>xử lý</b> yêu cầu.</div>
+</div>
+<div class="row mt">
+<div class="card c-rs g1 cap" style="--d:3s">③ <span class="tg t-rs">Response</span> (phản hồi): server trả kết quả về.</div>
+<div class="card c-fe g1 cap" style="--d:4.8s">④ Trình duyệt <b>hiển thị</b> kết quả cho người dùng.</div>
+</div>
+<div class="card c-n mt cap" style="--d:5.2s">📚 <b>Ví dụ:</b> Em là trình duyệt, thủ thư là server. Em hỏi mượn sách (Request) → thủ thư đưa sách (Response).</div>
+</section>
+
+<section class="slide">
+<h2><b>4</b>URL, HTTP và mã trạng thái</h2><p class="sub"><b>HTTP</b> (HyperText Transfer Protocol) là bộ quy tắc chung để trình duyệt (<b>client</b> – bên xin việc) và server hiểu nhau.</p>
+<div class="row" style="justify-content:center;gap:6px">
+<div class="up"><b style="background:var(--rq)">http://</b><small>Giao thức: dùng HTTP để nói chuyện</small></div>
+<div class="up"><b style="background:var(--be)">127.0.0.1</b><small>Host: địa chỉ máy chủ. Đây là chính máy em (localhost)</small></div>
+<div class="up"><b style="background:var(--fe)">:5000</b><small>Port: “cửa” của chương trình; Flask mặc định dùng 5000</small></div>
+<div class="up"><b style="background:var(--rs)">/send</b><small>Path (route): việc hoặc trang cần truy cập</small></div>
+</div>
+<div class="row mt" style="margin-top:20px">
+<div class="card c-rq g1"><span class="tg t-rq">Request</span> gồm:<br>① <b>Method</b> (GET, POST) ② <b>URL</b><br>③ <b>Headers</b>: thông tin kèm theo ④ <b>Body</b>: dữ liệu gửi đi (thường ở POST)</div>
+<div class="card c-rs g1"><span class="tg t-rs">Response</span> gồm:<br>① <b>Status code</b>: mã kết quả ② <b>Headers</b><br>③ <b>Body</b>: nội dung trả về (HTML hoặc JSON)</div>
+</div>
+<p class="sub" style="margin:16px 0 8px"><b>Status code</b> (mã trạng thái) cho biết Request thành công hay lỗi:</p>
+<div class="row" style="gap:12px">
+<div class="st" style="background:var(--rs)"><b>200 OK</b>Thành công</div>
+<div class="st" style="background:var(--fe)"><b>404 Not Found</b>Sai route, không tìm thấy</div>
+<div class="st" style="background:var(--rq)"><b>405 Method Not Allowed</b>Sai phương thức</div>
+<div class="st" style="background:var(--da)"><b>500 Server Error</b>Code Python bị lỗi</div>
+</div>
+</section>
+
+<section class="slide">
+<h2><b>4</b>Làm quen với Flask</h2><p class="sub"><b>Flask</b> là thư viện Python nhỏ gọn để tạo web server – ít code, dễ học, chạy ngay.</p>
+<div class="row">
+<div class="col" style="width:470px">
+<div class="card c-n"><b>Cài đặt và chạy</b><br><code>pip install flask</code><br><code>python app.py</code><br><span class="sm">Mở trình duyệt: http://127.0.0.1:5000</span></div>
+<pre><span data-g="1">from flask import Flask</span><span> </span><span data-g="2">app = Flask(__name__)</span><span> </span><span data-g="3">@app.route("/")</span><span data-g="4">def home():</span><span data-g="4">    return "Hello World!"</span><span> </span><span data-g="5">app.run(debug=True)</span></pre>
+</div>
+<ul class="ex g1">
+<li data-g="1"><span class="tg t-be">1</span> Nhập (<code>import</code>) công cụ Flask vào chương trình.</li>
+<li data-g="2"><span class="tg t-be">2</span> Tạo <code>app</code> – chính là server của em.</li>
+<li data-g="3"><span class="tg t-be">3</span> <b>Route</b> (đường dẫn): địa chỉ URL. “/” là trang chủ. Dấu <code>@</code> (decorator) gắn route vào hàm ngay bên dưới.</li>
+<li data-g="4"><span class="tg t-be">4</span> Hàm chạy khi có người truy cập route; <code>return</code> là Response gửi về.</li>
+<li data-g="5"><span class="tg t-be">5</span> Bật server. <code>debug=True</code> tự tải lại khi em sửa code.</li>
+</ul></div>
+</section>
+
+<section class="slide">
+<h2><b>5</b>HTML giao tiếp với Flask như thế nào?</h2><p class="sub">HTML tạo giao diện – JavaScript gửi yêu cầu – Flask xử lý yêu cầu.</p>
+<div class="flow" style="margin-top:20px">
+<div class="node fe" style="width:200px"><big>🧱</big><b>HTML</b><small>Tạo giao diện</small></div>
+<div class="lane" style="--du:1.4s"><span class="pk f da" style="--d:0s">Dữ liệu</span><span class="pk b rs" style="--d:5.4s">Kết quả</span></div>
+<div class="node js" style="width:200px"><big>✉️</big><b>JavaScript</b><small>Gửi yêu cầu bằng fetch()</small></div>
+<div class="lane" style="--du:1.4s"><span class="pk f rq" style="--d:1.6s">Request</span><span class="pk b rs" style="--d:3.6s">Response</span></div>
+<div class="node be" style="width:200px"><big>🐍</big><b>Flask</b><small>Xử lý yêu cầu</small></div>
+</div>
+<div class="row mt" style="margin-top:26px">
+<div class="card c-fe g1"><span class="tg t-fe">Frontend</span><br>HTML + JavaScript chạy trên <b>trình duyệt</b> của người dùng.</div>
+<div class="card c-be g1"><span class="tg t-be">Backend</span><br>Flask chạy trên <b>server</b>, lưu và xử lý dữ liệu.</div>
+</div>
+<div class="card c-n mt"><code>fetch()</code> là lệnh của JavaScript để gửi Request đến server. Dữ liệu thường được viết dạng <b>JSON</b> – cách ghi dữ liệu gọn như <code>{"name": "Lan"}</code>.</div>
+<div class="row" style="font-size:16px"><div class="card c-fe g1"><b>① Bấm nút</b><br>Người dùng thao tác trên HTML.</div><div class="card c-rq g1"><b>② Gửi Request</b><br><code>fetch()</code> gửi đến Flask.</div><div class="card c-be g1"><b>③ Xử lý</b><br>Flask chạy route tương ứng.</div><div class="card c-rs g1"><b>④ Trả Response</b><br>Flask gửi JSON về trình duyệt.</div><div class="card c-fe g1"><b>⑤ Cập nhật</b><br>JavaScript hiển thị lên HTML.</div></div>
+</section>
+
+<section class="slide">
+<h2><b>6</b>JSON và fetch(): ngôn ngữ chung của JavaScript và Python</h2><p class="sub">Hai ngôn ngữ khác nhau cần một định dạng chung để trao đổi dữ liệu.</p>
+<div class="row">
+<div class="card c-da g1"><span class="tg t-da">JSON</span> (JavaScript Object Notation): văn bản ghi dữ liệu dạng <b>khóa: giá trị</b>.<br><span class="sm">Khóa và chuỗi đặt trong dấu nháy kép, các cặp cách nhau bằng dấu phẩy.</span></div>
+<pre style="width:380px;font-size:17px"><span>{</span><span>  "name": "Lan",</span><span>  "age": 13</span><span>}</span></pre>
+</div>
+<div class="card c-rq mt cap" style="--d:.3s;margin-top:18px"><b>Gửi đi (POST):</b><br>object JavaScript → <code>JSON.stringify()</code> → chuỗi JSON → <code>request.get_json()</code> → dict Python</div>
+<div class="card c-rs mt cap" style="--d:1.2s"><b>Trả về (Response):</b><br>dict Python → <code>jsonify()</code> → chuỗi JSON → <code>res.json()</code> → object JavaScript</div>
+<div class="row mt" style="margin-top:18px">
+<div class="card c-fe g1"><code>fetch()</code> gửi Request và trả về một <b>Promise</b> – “lời hứa” rằng kết quả sẽ có sau, vì server cần thời gian trả lời.</div>
+<div class="card c-n g1"><code>await</code> = đợi server trả lời xong rồi mới chạy tiếp. <code>async</code> đánh dấu hàm có dùng <code>await</code>.<br><span class="sm">🍕 Như đặt pizza: đợi shipper tới rồi mới ăn.</span></div>
+</div>
+</section>
+
+<section class="slide">
+<h2><b>6</b>GET và POST</h2><p class="sub">Hai <b>phương thức</b> (method) để gửi Request. Chọn đúng việc cần làm.</p>
+<div class="card c-rq"><span class="tg t-rq">POST</span> <b>– Gửi dữ liệu đến server</b> · như bỏ thư vào hộp thư 📮
+<div class="flow"><div class="node fe" style="width:190px"><b>Người dùng</b><small>gửi tên “Lan”</small></div>
+<div class="lane" style="--du:1.8s;height:70px"><span class="pk f rq" style="top:14px">POST name="Lan"</span></div>
+<div class="node be" style="width:210px"><b>Server nhận tên</b><div class="mem">name = <span class="vv"><b class="v0">trống</b><b class="v1">"Lan"</b></span></div></div></div></div>
+<div class="card c-rq mt"><span class="tg t-rq">GET</span> <b>– Lấy dữ liệu từ server</b> · như mở hộp thư xem thư 📬
+<div class="flow"><div class="node fe" style="width:190px"><b>Người dùng</b><small>muốn xem tên</small></div>
+<div class="lane" style="--du:1.8s;height:70px"><span class="pk f rq" style="--d:3s;top:4px">GET /get</span><span class="pk b rs" style="--d:4.8s;top:40px">“Lan”</span></div>
+<div class="node be" style="width:210px"><b>Server trả tên đã lưu</b><div class="mem">name = "Lan"</div></div></div></div>
+<p class="sm">Nhớ nhanh: <b>POST = đưa đi</b> (dữ liệu đi từ HTML đến Flask), <b>GET = lấy về</b> (dữ liệu quay về HTML).</p>
+</section>
+
+<section class="slide">
+<h2><b>7</b>So sánh GET và POST</h2><p class="sub">Chọn phương thức theo mục đích của Request.</p>
+<table class="tb"><tr><th></th><th style="background:var(--rs)">GET</th><th style="background:var(--rq)">POST</th></tr>
+<tr><td>Mục đích</td><td>Lấy dữ liệu từ server</td><td>Gửi dữ liệu đến server</td></tr>
+<tr><td>Dữ liệu nằm ở</td><td>Trên URL, ví dụ <code>/get?name=Lan</code></td><td>Trong Body của Request</td></tr>
+<tr><td>Thay đổi server?</td><td>Không, chỉ đọc</td><td>Có: lưu, tạo hoặc sửa dữ liệu</td></tr>
+<tr><td>Độ riêng tư</td><td>Dữ liệu hiện trên URL, không dùng cho mật khẩu</td><td>Không hiện trên URL (vẫn cần HTTPS để an toàn)</td></tr>
+<tr><td>Kích thước</td><td>Nhỏ, URL có giới hạn độ dài</td><td>Lớn hơn nhiều</td></tr>
+<tr><td>Trong Flask</td><td>Mặc định: <code>@app.route("/get")</code></td><td>Phải khai báo: <code>methods=["POST"]</code></td></tr>
+<tr><td>Ví dụ đời thường</td><td>Mở hộp thư xem thư, tìm kiếm</td><td>Bỏ thư vào hộp, đăng nhập, gửi biểu mẫu</td></tr></table>
+<div class="card c-n mt" style="margin-top:20px">💡 Gõ địa chỉ vào thanh trình duyệt luôn gửi <b>GET</b>. Nếu gửi GET đến route chỉ cho phép POST, server trả lỗi <b>405</b>.</div>
+</section>
+
+<section class="slide">
+<h2><b>7</b>Ví dụ 1: Gửi dữ liệu từ HTML đến Python</h2><p class="sub">Nhập tên, bấm Send → JavaScript gửi POST → Flask lưu vào biến.</p>
+<div class="row">
+<pre class="g1" style="font-size:13px"><span data-g="1">&lt;input id="name"&gt;</span><span data-g="1">&lt;button onclick="sendName()"&gt;Send&lt;/button&gt;</span><span>&lt;script&gt;</span><span data-g="2">function sendName() {</span><span data-g="2">  fetch("/send", {</span><span data-g="2">    method: "POST",</span><span data-g="2">    headers: {"Content-Type": "application/json"},</span><span data-g="2">    body: JSON.stringify({name:</span><span data-g="2">      document.getElementById("name").value})</span><span data-g="2">  });</span><span data-g="2">}</span><span>&lt;/script&gt;</span></pre>
+<pre class="g1" style="font-size:13px"><span>from flask import Flask, request, jsonify</span><span>app = Flask(__name__)</span><span data-g="4">saved_name = ""</span><span> </span><span data-g="3">@app.route("/send", methods=["POST"])</span><span data-g="3">def send():</span><span data-g="4">    global saved_name</span><span data-g="3">    data = request.get_json()</span><span data-g="4">    saved_name = data["name"]</span><span data-g="3">    return jsonify({"status": "ok"})</span></pre>
+</div>
+<div class="flow mt" style="margin-top:16px">
+<div class="node fe" style="width:240px"><div class="ui"><span>Lan</span><span class="bt">Send</span></div><b>HTML + JavaScript</b></div>
+<div class="lane" style="--du:2s"><span class="pk f rq" style="--d:.5s;width:200px">POST {name:“Lan”}</span><span class="pk b rs" style="--d:3s">status: ok</span></div>
+<div class="node be" style="width:240px"><b>Flask Server</b><div class="mem">saved_name = <span class="vv" style="--d:2.4s"><b class="v0">""</b><b class="v1">"Lan"</b></span></div></div>
+</div>
+<p class="sm" style="margin:6px 0 0">① ô nhập · ② fetch gửi POST · ③ route /send nhận · ④ lưu vào biến <code>saved_name</code>. <span class="tg t-da">Data</span> = chữ “Lan”.</p>
+</section>
+
+<section class="slide">
+<h2><b>8</b>Ví dụ 2: Lấy dữ liệu từ Python về HTML</h2><p class="sub">Bấm Get Data → JavaScript gửi GET → Flask trả dữ liệu → HTML hiển thị.</p>
+<div class="row">
+<pre class="g1" style="font-size:13px"><span data-g="1">&lt;button onclick="getData()"&gt;Get Data&lt;/button&gt;</span><span data-g="4">&lt;p id="result"&gt;&lt;/p&gt;</span><span>&lt;script&gt;</span><span data-g="1">async function getData() {</span><span data-g="2">  const res = await fetch("/get");</span><span data-g="3">  const data = await res.json();</span><span data-g="4">  document.getElementById("result")</span><span data-g="4">    .innerText = data.name;</span><span>}</span><span>&lt;/script&gt;</span></pre>
+<pre class="g1" style="font-size:13px"><span data-g="2">@app.route("/get")</span><span data-g="2">def get_data():</span><span data-g="3">    return jsonify({"name": saved_name})</span></pre>
+</div>
+<ul class="ex" style="margin-top:12px;font-size:17px">
+<li data-g="1"><b>Bước 1:</b> bấm nút, hàm <code>getData()</code> chạy.</li>
+<li data-g="2"><b>Bước 2:</b> <code>fetch("/get")</code> gửi GET Request; Flask chạy route <code>/get</code>.</li>
+<li data-g="3"><b>Bước 3:</b> Flask trả JSON <code>{"name": "Lan"}</code>; JavaScript đọc bằng <code>res.json()</code>.</li>
+<li data-g="4"><b>Bước 4:</b> hiển thị tên vào thẻ <code>&lt;p&gt;</code>.</li>
+</ul>
+<div class="flow" style="margin-top:6px">
+<div class="node fe" style="width:240px"><div class="ui"><span class="bt">Get Data</span></div><b>Xin chào, <span class="vv" style="--d:3.2s;min-width:40px"><b class="v0"></b><b class="v1">Lan</b></span></b></div>
+<div class="lane" style="--du:1.8s;height:90px"><span class="pk f rq" style="top:6px">GET /get</span><span class="pk b rs" style="--d:1.9s;top:50px">Response “Lan”</span></div>
+<div class="node be" style="width:240px"><b>Flask Server</b><div class="mem">saved_name = "Lan"</div></div>
+</div>
+</section>
+
+<section class="slide">
+<h2><b>9</b>Tổng hợp: Hai chiều trao đổi dữ liệu</h2><p class="sub">POST đưa dữ liệu đi, GET kéo dữ liệu về – HTML và Flask luôn đi theo cặp Request/Response.</p>
+<div class="flow mt" style="margin-top:14px">
+<div class="node fe" style="width:230px"><big>🌐</big><b>HTML + JavaScript</b><small>Giao diện, gửi và nhận</small></div>
+<div class="lane" style="--du:1.8s;height:130px"><span class="pk f rq" style="top:12px;width:190px">POST name="Lan"</span><span class="pk b rs" style="--d:1.9s;top:84px">ok</span><span class="pk f rq" style="--d:3.8s;top:12px;width:190px">GET /get</span><span class="pk b rs" style="--d:5.7s;top:84px">“Lan”</span></div>
+<div class="node be" style="width:230px"><big>🐍</big><b>Flask Server</b><div class="mem">saved_name = <span class="vv" style="--d:1.7s"><b class="v0">""</b><b class="v1">"Lan"</b></span></div></div>
+</div>
+<div class="row" style="margin-top:34px">
+<div class="card c-fe g1"><span class="tg t-fe">Frontend</span><br>Nhập và hiển thị dữ liệu. Quyết định lúc nào gửi Request.</div>
+<div class="card c-rq g1"><span class="tg t-rq">Request</span><br>POST mang dữ liệu đi, GET xin dữ liệu.</div>
+<div class="card c-be g1"><span class="tg t-be">Backend</span><br>Lưu dữ liệu vào biến và trả lại khi được hỏi.</div>
+<div class="card c-rs g1"><span class="tg t-rs">Response</span><br>Kết quả server gửi về, thường là JSON.</div>
+</div>
+<div class="card c-n mt">⚠️ Biến <code>saved_name</code> nằm trong bộ nhớ của server: tắt server thì dữ liệu mất. Muốn lưu lâu dài cần file hoặc cơ sở dữ liệu.</div>
+</section>
+
+<section class="slide">
+<h2><b>10</b>Mini Project: My Name Server</h2><p class="sub">Thư mục: <code>app.py</code> và <code>templates/index.html</code>. Hoàn thành 4 chỗ TODO.</p>
+<div class="row">
+<div class="col" style="width:380px;font-size:17px">
+<div class="card c-n" style="padding:8px 14px"><b>Các bước thực hiện</b><br>1. Nhập tên vào ô input.<br>2. Bấm Send để gửi tên đến Flask.<br>3. Flask lưu tên vào biến.<br>4. Bấm Get Data để lấy tên về.<br>5. HTML hiển thị kết quả.</div>
+<div class="card c-n" style="padding:8px 14px"><b>Giao diện mẫu</b>
+<div class="ui" style="margin-top:6px"><span>Nhập tên</span><span class="bt">Send</span><span class="bt">Get Data</span></div><div style="text-align:center">Xin chào, Lan!</div></div>
+<div class="card c-n" style="padding:8px 14px"><b>Gợi ý:</b> TODO 1–2 xem lại Ví dụ 1 và 2 (Python); TODO 3–4 là JavaScript.</div>
+</div>
+<div class="col g1">
+<pre style="font-size:12.5px"><span>from flask import Flask, request, jsonify, render_template</span><span>app = Flask(__name__)</span><span>saved_name = ""</span><span>@app.route("/")</span><span>def home():</span><span>    return render_template("index.html")</span><span>@app.route("/send", methods=["POST"])</span><span>def send():</span><span>    global saved_name</span><span>    <i># TODO 1: lấy tên từ request.get_json()</i></span><span>    return jsonify({"status": "ok"})</span><span>@app.route("/get")</span><span>def get_data():</span><span>    <i># TODO 2: thay "" bằng saved_name</i></span><span>    return jsonify({"name": ""})</span><span>app.run(debug=True)</span></pre>
+<pre style="font-size:12.5px"><span>&lt;input id="name" placeholder="Nhập tên"&gt;</span><span>&lt;button onclick="sendName()"&gt;Send&lt;/button&gt;</span><span>&lt;button onclick="getData()"&gt;Get Data&lt;/button&gt;</span><span>&lt;p id="result"&gt;&lt;/p&gt;</span><span>&lt;script&gt;</span><span>function sendName() { <i>/* TODO 3: fetch POST đến /send */</i> }</span><span>async function getData() { <i>/* TODO 4: fetch GET /get, hiển thị */</i> }</span><span>&lt;/script&gt;</span></pre>
+</div></div>
+</section>
+
+<section class="slide">
+<h2><b>11</b>Thực hành cuối giờ: hướng dẫn từng bước</h2><p class="sub">Thời gian gợi ý: 25 phút. Làm xong mỗi bước, tích vào ô kiểm tra trước khi sang bước tiếp.</p>
+<div class="row">
+<div class="col g1" style="font-size:18px">
+<div class="card c-n">☐ <b>Bước 1 – Tạo dự án.</b> Tạo thư mục <code>my-name-server</code>, trong đó có <code>app.py</code> và thư mục <code>templates</code> chứa <code>index.html</code>.</div>
+<div class="card c-n">☐ <b>Bước 2 – Cài Flask.</b> Mở Terminal, gõ <code>pip install flask</code>.</div>
+<div class="card c-n">☐ <b>Bước 3 – Viết code.</b> Làm theo 3 slide giải thích tiếp theo: app.py, giao diện HTML, JavaScript.</div>
+<div class="card c-n">☐ <b>Bước 4 – Chạy server.</b> Gõ <code>python app.py</code>, rồi mở <code>http://127.0.0.1:5000</code>.</div>
+<div class="card c-n">☐ <b>Bước 5 – Kiểm tra.</b> Nhập tên, bấm Send, bấm Get Data, phải thấy “Xin chào, tên của em!”.</div>
+</div>
+<div class="col" style="width:380px">
+<pre style="font-size:15px"><span>my-name-server/</span><span>├── app.py</span><span>└── templates/</span><span>    └── index.html</span></pre>
+<div class="card c-n" style="font-size:17px"><b>Mẹo quan sát Request</b><br>Nhấn <code>F12</code> → tab <b>Network</b>, bấm Send. Em sẽ thấy dòng <code>send</code> với method <b>POST</b> và status <b>200</b>. Bấm Get Data để thấy dòng <code>get</code> với method <b>GET</b>.</div>
+<div class="card c-n" style="font-size:17px"><b>Nhớ:</b> sửa file Python xong cần lưu (Ctrl+S). Dữ liệu trong <code>saved_name</code> mất khi tắt server.</div>
+</div></div>
+</section>
+
+<section class="slide">
+<h2><b>12</b>Bước 3a – Viết app.py: giải thích từng dòng</h2><p class="sub">File Python, toàn bộ phần Backend. Dòng tô vàng ứng với lời giải thích tô vàng bên phải.</p>
+<div class="row">
+<pre class="ln" style="font-size:13.5px;width:560px;align-self:flex-start"><span data-g="1">from flask import Flask, request, jsonify, render_template</span><span> </span><span data-g="2">app = Flask(__name__)</span><span data-g="3">saved_name = ""</span><span> </span><span data-g="4">@app.route("/")</span><span data-g="4">def home():</span><span data-g="4">    return render_template("index.html")</span><span> </span><span data-g="5">@app.route("/send", methods=["POST"])</span><span data-g="5">def send():</span><span data-g="6">    global saved_name</span><span data-g="7">    data = request.get_json()</span><span data-g="7">    saved_name = data["name"]</span><span data-g="8">    return jsonify({"status": "ok"})</span><span> </span><span data-g="9">@app.route("/get")</span><span data-g="9">def get_data():</span><span data-g="9">    return jsonify({"name": saved_name})</span><span> </span><span data-g="10">app.run(debug=True)</span></pre>
+<ul class="ex s g1">
+<li data-g="1"><b>Dòng 1:</b> Nhập 4 công cụ: <code>Flask</code> (tạo server), <code>request</code> (đọc dữ liệu nhận), <code>jsonify</code> (trả JSON), <code>render_template</code> (trả HTML).</li>
+<li data-g="2"><b>Dòng 3:</b> Tạo server tên <code>app</code>. <code>__name__</code> giúp Flask tìm thư mục <code>templates</code>.</li>
+<li data-g="3"><b>Dòng 4:</b> Biến <code>saved_name</code> giữ tên đã nhận, ban đầu rỗng, nằm trong bộ nhớ server.</li>
+<li data-g="4"><b>Dòng 6–8:</b> Route “/” (trang chủ): mở <code>127.0.0.1:5000</code> thì server trả file <code>index.html</code>.</li>
+<li data-g="5"><b>Dòng 10–11:</b> Route <code>/send</code> chỉ nhận <b>POST</b>; hàm <code>send()</code> chạy khi có Request đến.</li>
+<li data-g="6"><b>Dòng 12:</b> <code>global</code> cho phép hàm sửa biến ngoài hàm. Thiếu dòng này, Python tạo một biến mới trong hàm.</li>
+<li data-g="7"><b>Dòng 13–14:</b> Đọc JSON ở Body thành dict <code>{"name": "Lan"}</code>, rồi lưu giá trị của khóa <code>"name"</code>.</li>
+<li data-g="8"><b>Dòng 15:</b> Trả Response JSON <code>{"status": "ok"}</code> báo đã nhận xong.</li>
+<li data-g="9"><b>Dòng 17–19:</b> Route <code>/get</code> (mặc định GET) trả tên đã lưu, ví dụ <code>{"name": "Lan"}</code>.</li>
+<li data-g="10"><b>Dòng 21:</b> Bật server. <code>debug=True</code> tự tải lại khi em sửa và lưu code.</li>
+</ul></div>
+</section>
+
+<section class="slide">
+<h2><b>13</b>Bước 3b – Viết index.html: phần giao diện</h2><p class="sub">File HTML đặt trong thư mục <code>templates</code>. Đây là Frontend: em nhìn thấy và bấm được.</p>
+<div class="row">
+<pre class="ln" style="font-size:14px;width:520px;align-self:flex-start"><span data-g="1">&lt;!DOCTYPE html&gt;</span><span data-g="1">&lt;html lang="vi"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;</span><span data-g="2">&lt;title&gt;My Name Server&lt;/title&gt;&lt;/head&gt;&lt;body&gt;</span><span data-g="3">  &lt;h1&gt;My Name Server&lt;/h1&gt;</span><span data-g="4">  &lt;input id="name" placeholder="Nhập tên"&gt;</span><span data-g="5">  &lt;button onclick="sendName()"&gt;Send&lt;/button&gt;</span><span data-g="5">  &lt;button onclick="getData()"&gt;Get Data&lt;/button&gt;</span><span data-g="6">  &lt;p id="result"&gt;&lt;/p&gt;</span><span data-g="7">  &lt;script&gt;</span><span data-g="7"><i>    ... (JavaScript ở slide sau)</i></span></pre>
+<ul class="ex s g1" style="font-size:15.5px">
+<li data-g="1"><b>Dòng 1–2:</b> Khai báo trang HTML5, ngôn ngữ tiếng Việt. <code>charset="utf-8"</code> giúp hiển thị chữ có dấu đúng.</li>
+<li data-g="2"><b>Dòng 3:</b> <code>&lt;title&gt;</code> là tên hiện trên tab trình duyệt; <code>&lt;body&gt;</code> mở phần nội dung nhìn thấy.</li>
+<li data-g="3"><b>Dòng 4:</b> Tiêu đề lớn của trang.</li>
+<li data-g="4"><b>Dòng 5:</b> Ô nhập tên. <code>id="name"</code> là “tên gọi” để JavaScript tìm thấy ô này; <code>placeholder</code> là chữ gợi ý mờ.</li>
+<li data-g="5"><b>Dòng 6–7:</b> Hai nút bấm. <code>onclick</code> nghĩa là khi bấm thì gọi hàm <code>sendName()</code> hoặc <code>getData()</code>.</li>
+<li data-g="6"><b>Dòng 8:</b> Đoạn văn trống có <code>id="result"</code>; JavaScript sẽ ghi kết quả vào đây.</li>
+<li data-g="7"><b>Dòng 9–10:</b> Mở thẻ <code>&lt;script&gt;</code>, nơi viết JavaScript ở bước tiếp theo.</li>
+</ul></div>
+<div class="card c-n mt" style="margin-top:14px"><span class="tg t-fe">Frontend</span> <b>Lưu ý:</b> <code>id</code> là sợi dây nối HTML với JavaScript. Viết sai <code>id</code> thì JavaScript sẽ không tìm thấy phần tử.</div>
+</section>
+
+<section class="slide">
+<h2><b>14</b>Bước 3c – Viết JavaScript: gửi và nhận dữ liệu</h2><p class="sub">Phần nằm giữa <code>&lt;script&gt;</code> và <code>&lt;/script&gt;</code> trong <code>index.html</code>. Số dòng tiếp nối slide trước.</p>
+<div class="row">
+<pre class="ln" style="font-size:13px;width:630px;align-self:flex-start;counter-reset:l 9"><span data-g="1">    async function sendName() {</span><span data-g="2">      const name = document.getElementById("name").value;</span><span data-g="3">      await fetch("/send", {</span><span data-g="3">        method: "POST",</span><span data-g="4">        headers: {"Content-Type": "application/json"},</span><span data-g="5">        body: JSON.stringify({name: name})</span><span>      });</span><span data-g="6">      document.getElementById("result").innerText = "Đã gửi: " + name;</span><span>    }</span><span data-g="7">    async function getData() {</span><span data-g="7">      const res = await fetch("/get");</span><span data-g="8">      const data = await res.json();</span><span data-g="9">      document.getElementById("result").innerText =</span><span data-g="9">        "Xin chào, " + data.name + "!";</span><span>    }</span></pre>
+<ul class="ex s g1">
+<li data-g="1"><b>Dòng 10:</b> Hàm chạy khi bấm Send. <code>async</code> báo hàm có dùng <code>await</code>.</li>
+<li data-g="2"><b>Dòng 11:</b> Tìm ô có <code>id="name"</code> rồi lấy chữ em nhập (<code>.value</code>).</li>
+<li data-g="3"><b>Dòng 12–13:</b> Gửi Request đến <code>/send</code> bằng <b>POST</b>; <code>await</code> đợi server trả lời.</li>
+<li data-g="4"><b>Dòng 14:</b> Header báo cho server biết dữ liệu gửi đi là JSON.</li>
+<li data-g="5"><b>Dòng 15:</b> Đổi object thành chuỗi JSON <code>{"name":"Lan"}</code> đặt vào Body.</li>
+<li data-g="6"><b>Dòng 17:</b> Ghi thông báo “Đã gửi” vào đoạn <code>id="result"</code>.</li>
+<li data-g="7"><b>Dòng 19–20:</b> Hàm chạy khi bấm Get Data. <code>fetch("/get")</code> mặc định là <b>GET</b>.</li>
+<li data-g="8"><b>Dòng 21:</b> Đọc Body JSON của Response thành object <code>data</code>.</li>
+<li data-g="9"><b>Dòng 22–23:</b> Hiển thị lời chào kèm <code>data.name</code> lên trang.</li>
+</ul></div>
+</section>
+
+<section class="slide">
+<h2><b>12</b>Code mẫu hoàn chỉnh</h2><p class="sub">Giáo viên chiếu sau khi học sinh làm xong, hoặc phát cho em cần gợi ý.</p>
+<div class="row">
+<div class="col" style="width:480px"><span class="tg t-be" style="align-self:flex-start">app.py</span>
+<pre style="font-size:12.2px"><span>from flask import Flask, request, jsonify, render_template</span><span> </span><span>app = Flask(__name__)</span><span>saved_name = ""</span><span> </span><span>@app.route("/")</span><span>def home():</span><span>    return render_template("index.html")</span><span> </span><span>@app.route("/send", methods=["POST"])</span><span>def send():</span><span>    global saved_name</span><span>    data = request.get_json()</span><span>    saved_name = data["name"]</span><span>    return jsonify({"status": "ok"})</span><span> </span><span>@app.route("/get")</span><span>def get_data():</span><span>    return jsonify({"name": saved_name})</span><span> </span><span>app.run(debug=True)</span></pre></div>
+<div class="col g1"><span class="tg t-fe" style="align-self:flex-start">templates/index.html</span>
+<pre style="font-size:12.2px"><span>&lt;!DOCTYPE html&gt;</span><span>&lt;html lang="vi"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;</span><span>&lt;title&gt;My Name Server&lt;/title&gt;&lt;/head&gt;&lt;body&gt;</span><span>  &lt;h1&gt;My Name Server&lt;/h1&gt;</span><span>  &lt;input id="name" placeholder="Nhập tên"&gt;</span><span>  &lt;button onclick="sendName()"&gt;Send&lt;/button&gt;</span><span>  &lt;button onclick="getData()"&gt;Get Data&lt;/button&gt;</span><span>  &lt;p id="result"&gt;&lt;/p&gt;</span><span>  &lt;script&gt;</span><span>    async function sendName() {</span><span>      const name = document.getElementById("name").value;</span><span>      await fetch("/send", {</span><span>        method: "POST",</span><span>        headers: {"Content-Type": "application/json"},</span><span>        body: JSON.stringify({name: name})</span><span>      });</span><span>      document.getElementById("result").innerText = "Đã gửi: " + name;</span><span>    }</span><span>    async function getData() {</span><span>      const res = await fetch("/get");</span><span>      const data = await res.json();</span><span>      document.getElementById("result").innerText =</span><span>        "Xin chào, " + data.name + "!";</span><span>    }</span><span>  &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</span></pre></div>
+</div>
+</section>
+
+<section class="slide">
+<h2><b>13</b>Lỗi thường gặp và thử thách mở rộng</h2><p class="sub">Đọc kỹ thông báo lỗi: nó thường chỉ ra đúng chỗ cần sửa.</p>
+<table class="tb" style="font-size:16.5px"><tr><th>Biểu hiện</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+<tr><td><code>ModuleNotFoundError: flask</code></td><td>Chưa cài Flask</td><td>Chạy <code>pip install flask</code></td></tr>
+<tr><td><code>TemplateNotFound</code></td><td><code>index.html</code> không nằm trong <code>templates</code></td><td>Tạo thư mục <code>templates</code> cùng cấp với <code>app.py</code></td></tr>
+<tr><td>404 Not Found</td><td>Đường dẫn trong <code>fetch</code> khác route</td><td>Cho <code>fetch("/send")</code> khớp <code>@app.route("/send")</code></td></tr>
+<tr><td>405 Method Not Allowed</td><td>Thiếu <code>methods=["POST"]</code></td><td>Thêm vào route <code>/send</code></td></tr>
+<tr><td>Get Data hiện rỗng</td><td>Chưa bấm Send, hoặc server vừa khởi động lại</td><td>Bấm Send trước rồi mới Get Data</td></tr>
+<tr><td>Sửa code mà không đổi</td><td>Chưa lưu file hoặc chưa tải lại trang</td><td>Lưu file, nhấn F5 trên trình duyệt</td></tr></table>
+<div class="card c-n mt" style="margin-top:18px"><b>Thử thách cho em làm nhanh</b><br>① Dùng danh sách <code>names = []</code> và <code>append()</code> để lưu nhiều tên, hiển thị tất cả.<br>② Thêm nút <b>Clear</b> dùng POST để xoá dữ liệu trên server.<br>③ Hiển thị thêm độ dài tên bằng <code>len(saved_name)</code> trong JSON trả về.</div>
+</section>
+
+<section class="slide">
+<h2><b>11</b>Tổng kết</h2><p class="sub">Nhắc lại các khái niệm chính của bài học.</p>
+<div class="row" style="font-size:17px">
+<div class="card c-fe g1"><span class="tg t-fe">Frontend</span><br>Phần người dùng nhìn thấy (HTML, JS).</div>
+<div class="card c-be g1"><span class="tg t-be">Backend</span><br>Phần xử lý dữ liệu (Python, Flask).</div>
+<div class="card c-n g1"><b>Server</b><br>Máy chủ chờ và trả lời yêu cầu.</div>
+<div class="card c-rq g1"><span class="tg t-rq">Request</span><br>Yêu cầu gửi đến server.</div>
+<div class="card c-rs g1"><span class="tg t-rs">Response</span><br>Kết quả server trả về.</div>
+</div>
+<div class="row mt" style="margin-top:20px">
+<div class="card c-rq g1"><span class="tg t-rq">POST</span> <b>Gửi dữ liệu</b><br>HTML → Flask<br><code>fetch("/send", {method: "POST"})</code></div>
+<div class="card c-rq g1"><span class="tg t-rq">GET</span> <b>Lấy dữ liệu</b><br>Flask → HTML<br><code>fetch("/get")</code></div>
+</div>
+<div class="flow loop" style="margin-top:20px">
+<div class="node fe" style="width:230px"><b>HTML + JS</b><small>Frontend</small></div>
+<div class="lane" style="--du:2.4s"><span class="pk f rq">POST / GET</span><span class="pk b rs" style="--d:1.2s">JSON</span></div>
+<div class="node be" style="width:230px"><b>Flask</b><small>Backend</small></div>
+</div>
+<p class="sm" style="text-align:center;margin-top:4px">Giỏi lắm! Hãy hoàn thành My Name Server rồi thử thêm tính năng của riêng em.</p>
+</section>
+
+</div></div>
+<div class="bar"><div id="prog"></div>
+<button id="pv">◀ Previous</button><button id="nx">Next ▶</button><span id="cnt"></span><span style="flex:1"></span>
+<button class="sec" id="rp">↻ Replay</button><button class="sec" id="fsb">⛶ Toàn màn hình</button><button class="sec" id="pr">🖨 In / PDF</button></div>
+<script>
+const S=[...document.querySelectorAll('.slide')],N=S.length,V=document.getElementById('view'),D=document.getElementById('deck');
+let i=0,timer;
+S.forEach((s,k)=>{const b=s.querySelector('h2 b');if(b)b.textContent=k+1});
+S.forEach((s,k)=>s.insertAdjacentHTML('beforeend','<div class="ft"><span>Flask &amp; HTML · Frontend ↔ Backend</span><span class="lg"><i style="background:var(--fe)"></i>Frontend<i style="background:var(--be)"></i>Backend<i style="background:var(--rq)"></i>Request<i style="background:var(--rs)"></i>Response<i style="background:var(--da)"></i>Data</span><span>'+(k+1)+' / '+N+'</span></div>'));
+function fit(){const s=Math.min(V.clientWidth/1188,V.clientHeight/840)*.97;D.style.transform='translate(-50%,-50%) scale('+s+')'}
+function play(){const s=S[i];clearInterval(timer);s.classList.remove('go');s.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));void s.offsetWidth;s.classList.add('go');
+const g=[...new Set([...s.querySelectorAll('[data-g]')].map(e=>+e.dataset.g))].sort((a,b)=>a-b);
+if(g.length){let k=0;const t=()=>{s.querySelectorAll('[data-g]').forEach(e=>e.classList.toggle('on',+e.dataset.g==g[k%g.length]));k++};t();timer=setInterval(t,2200)}}
+function show(n){i=Math.max(0,Math.min(N-1,n));S.forEach((s,k)=>s.classList.toggle('active',k==i));document.getElementById('prog').style.width=(i+1)/N*100+'%';document.getElementById('cnt').textContent='Slide '+(i+1)+' / '+N;play()}
+function fs(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+document.getElementById('pv').onclick=()=>show(i-1);document.getElementById('nx').onclick=()=>show(i+1);document.getElementById('rp').onclick=play;document.getElementById('fsb').onclick=fs;document.getElementById('pr').onclick=()=>window.print();
+addEventListener('keydown',e=>{if(e.key=='ArrowRight'||e.key=='PageDown'||e.key==' ')show(i+1);else if(e.key=='ArrowLeft'||e.key=='PageUp')show(i-1);else if(e.key=='f'||e.key=='F')fs();else if(e.key=='r'||e.key=='R')play()});
+document.addEventListener('fullscreenchange',()=>{document.body.classList.toggle('fs',!!document.fullscreenElement);setTimeout(fit,50)});
+addEventListener('resize',fit);addEventListener('beforeprint',()=>S.forEach(s=>s.classList.add('go')));
+function tidy(){S.forEach(s=>{s.classList.add('active');const all=[...s.children].filter(e=>!e.classList.contains('ft'));const body=all.slice(s.querySelector('h2')?2:3);if(!body.length){s.classList.remove('active');return}
+const R=()=>s.getBoundingClientRect(),wrap=document.createElement('div');wrap.className='bd';s.insertBefore(wrap,s.querySelector('.ft'));body.forEach(e=>wrap.appendChild(e));const bt=()=>wrap.getBoundingClientRect().bottom-R().top,A=770-(wrap.getBoundingClientRect().top-R().top);
+body[0].style.marginTop='0px';body.slice(1).forEach(e=>e.style.marginTop='28px');
+const clip=()=>[...wrap.querySelectorAll('pre')].some(p=>{const pr=p.getBoundingClientRect();return [...p.children].some(sp=>{const g=document.createRange();g.selectNodeContents(sp);return g.getBoundingClientRect().right>pr.right-6})});let z=Math.min(1.28,A/wrap.getBoundingClientRect().height*.98);const sc=()=>{wrap.style.width=(100/z)+'%';wrap.style.transform='scale('+z+')'};if(z>1.03){sc();while((bt()>770||wrap.scrollWidth*z>1080||clip()||[...wrap.querySelectorAll('.lane')].some(l=>l.offsetWidth<172))&&z>1){z-=.01;sc()}}
+const r=770-bt();if(r>40)wrap.style.marginTop=Math.min(Math.floor(r*.35),36)+'px'
+s.classList.remove('active')})}
+tidy();fit();show(0);
+</script></body></html>
